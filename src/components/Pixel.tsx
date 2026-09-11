@@ -4,22 +4,20 @@ import { PixelColor } from '../types';
 interface PixelProps {
   index: number;
   color: PixelColor;
-  onPaint: (index: number) => void;
-  isMouseDown: boolean;
+  onMouseDown: (index: number) => void;
+  onMouseEnter: (index: number) => void;
 }
 
-export const Pixel: React.FC<PixelProps> = React.memo(({ index, color, onPaint, isMouseDown }) => {
+export const Pixel: React.FC<PixelProps> = React.memo(({ index, color, onMouseDown, onMouseEnter }) => {
   const isLit = color !== null;
 
   const handleMouseEnter = () => {
-    if (isMouseDown) {
-      onPaint(index);
-    }
+    onMouseEnter(index);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-    onPaint(index);
+    onMouseDown(index);
   };
 
   return (
