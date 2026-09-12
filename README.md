@@ -1,5 +1,7 @@
 # PokeBitBuilder
 
+**Demo ao vivo: [poke-bit-builder.vercel.app](https://poke-bit-builder.vercel.app/)**
+
 Editor de pixel art 8x8 para chaveiros de LED endereçável
 (WS2812/SK6812), feito para alimentar uma pequena linha de chaveiros
 eletrônicos vendidos junto com artist alley.
@@ -41,6 +43,9 @@ npm run build
 - Toggle de fiação **serpentina (zig-zag)** na exportação, já que
   muitos painéis WS2812 8x8 prontos não são fiados em ordem simples
   linha por linha
+- Toggle de apagar (modo travado por gesto): clicar ou arrastar sobre
+  um LED que já tem a cor selecionada apaga ele — e todo o gesto de
+  arraste que começa assim permanece em modo apagar até soltar o mouse
 
 ## Stack
 
@@ -63,6 +68,16 @@ o placar de "passou"), e a identificação e correção de um bug real de
 duplicação de lógica (o remapeamento de fiação serpentina não estava
 sendo aplicado de forma consistente entre os dois formatos de
 exportação).
+
+Também incluiu debugar dois problemas de infraestrutura fora do código
+da feature em si: uma falha de deploy causada por `node_modules`
+commitado no Git (binário `tsc` perdendo a permissão de execução ao
+sair do Windows para o ambiente Linux da Vercel), e um `.gitignore`
+que parecia correto visualmente mas continha um caractere BOM
+invisível no início do arquivo, impedindo que `node_modules` e `dist`
+fossem de fato ignorados. Depois disso, uma feature nova (toggle de
+apagar) foi desenvolvida numa branch separada e integrada via Pull
+Request no GitHub.
 
 Decisões de design e correções, com o porquê de cada uma, estão
 documentadas em [`DECISIONS.md`](./DECISIONS.md).

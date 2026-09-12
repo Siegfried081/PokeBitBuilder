@@ -65,3 +65,51 @@ futura entre os dois formatos.
 banco de dados, sem múltiplos frames. Escopo pequeno o suficiente para
 terminar em poucas sessões — decisões desse tipo ficam para uma v2, se
 fizer sentido.
+
+## 7. Bug de deploy: `node_modules` commitado quebrando o build na Vercel
+
+O primeiro deploy falhou com `Permission denied` ao tentar executar o
+`tsc`. Causa raiz: o `node_modules` tinha sido commitado no Git a
+partir do Windows. O Git, ao gravar arquivos criados no Windows,
+costuma salvar o bit de execução como desligado — e o binário do
+`tsc`, ao ser clonado literalmente num ambiente Linux (a Vercel),
+manteve essa permissão errada.
+
+**Correção:** remover `node_modules` (e `dist`, gerado pelo build,
+pelo mesmo motivo) do controle de versão com `git rm -r --cached`,
+garantindo que o `npm install` da Vercel gere os binários do zero,
+direto no Linux, com a permissão correta.
+
+## 8. Bug: `.gitignore` com BOM invisível não ignorava nada
+
+Mesmo depois da correção acima, uma branch de feature criada antes
+dela continuava mostrando `node_modules`/`dist` como não rastreados
+em vez de ignorados. Causa: o `.gitignore` tinha sido escrito via
+PowerShell (`echo ... >> .gitignore`), que grava UTF-8 com um marcador
+BOM no início do arquivo — um caractere invisível que fazia o Git ler
+a primeira linha como diferente de `node_modules`, então a regra nunca
+batia.
+
+**Correção:** reescrever o arquivo com `printf` no Git Bash, que não
+insere BOM. Lição: um arquivo de configuração pode parecer visualmente
+correto e ainda assim falhar por causa de bytes invisíveis — vale
+checar o conteúdo bruto quando o comportamento não bate com o que está
+escrito na tela.
+
+## 9. Toggle de apagar: modo travado pelo pixel inicial do gesto
+
+Adicionamos uma forma de apagar um LED clicando ou arrastando sobre
+ele quando ele já tem a cor selecionada. Isso levanta uma ambiguidade
+em arrastes que passam por LEDs de cores variadas: cada pixel decide
+por si (modo misto), ou o primeiro pixel tocado decide o modo do
+gesto inteiro?
+
+**Decisão:** modo travado pelo primeiro pixel. Se o LED onde o gesto
+começa (`mousedown`) já tem a cor selecionada, o arraste inteiro vira
+modo apagar (só apaga LEDs daquela cor, ignora o resto); caso
+contrário, o arraste inteiro pinta normalmente. O modo não muda até o
+mouse ser solto, mesmo que o gesto passe por LEDs de outras cores.
+Mais previsível do que decidir célula por célula durante o arraste.
+Desenvolvido numa branch separada (`feature/toggle-clique-mesma-cor`)
+e integrado via Pull Request, como prática deliberada do fluxo
+branch → PR → merge.
